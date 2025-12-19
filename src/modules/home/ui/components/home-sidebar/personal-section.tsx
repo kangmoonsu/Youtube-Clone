@@ -1,37 +1,46 @@
 "use client";
 
-import { FlameIcon, HomeIcon, PlaySquareIcon } from "lucide-react";
+import { HistoryIcon, ListVideoIcon, ThumbsUpIcon } from "lucide-react";
+import { useAuth, useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import {
     SidebarGroup,
     SidebarGroupContent,
     SidebarMenu,
     SidebarMenuItem,
-    SidebarMenuButton
+    SidebarMenuButton,
+    SidebarGroupLabel
 } from "@/components/ui/sidebar";
 
 const items = [
     {
-        title: "Home",
-        url: "/",
-        icon: HomeIcon,
-    },
-    {
-        title: "Subscriptions",
-        url: "/feed/subscriptions",
-        icon: PlaySquareIcon,
+        title: "History",
+        url: "/playlists/history",
+        icon: HistoryIcon,
         auth: true,
     },
     {
-        title: "Trending",
-        url: "/feed/trending",
-        icon: FlameIcon,
+        title: "Liked videos",
+        url: "/playlists/liked-videos",
+        icon: ThumbsUpIcon,
+        auth: true,
+    },
+    {
+        title: "All playlists",
+        url: "/playlists",
+        icon: ListVideoIcon,
+        auth: true,
     },
 ];
 
-export const MainSection = () => {
+export const PersonalSection = () => {
+
+    const { isSignedIn } = useAuth();
+    const clerk = useClerk();
+
     return (
         <SidebarGroup>
+            <SidebarGroupLabel>You</SidebarGroupLabel>
             <SidebarGroupContent>
                 <SidebarMenu>
                     {items.map((item) => (
@@ -40,7 +49,12 @@ export const MainSection = () => {
                                 tooltip={item.title}
                                 asChild
                                 isActive={false}
-                                onClick={() => { }}>
+                                onClick={(e) => {
+                                    if (item.auth && !isSignedIn) {
+                                        e.preventDefault();
+                                        return clerk.openSignIn();
+                                    }
+                                }}>
                                 <Link href={item.url} className="flex items-center gap-4">
                                     <item.icon />
                                     <span className="text-sm">{item.title}</span>
