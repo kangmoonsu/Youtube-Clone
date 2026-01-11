@@ -1,6 +1,5 @@
 import { and, eq } from "drizzle-orm";
 import { serve } from "@upstash/workflow/nextjs"
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 import { db } from "@/db";
 import { videos } from "@/db/schema";
@@ -50,16 +49,28 @@ export const { POST } = serve(
       return text;
     })
 
-    const description = await context.run("generate-description", async () => {
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const { body } = await context.api.openai.call(
+      "generate-description",
+      {
+        token: process.env.OPENAI_API_KEY!,
+        operation: "chat.completions.create",
+        body: {
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: DESCRIPTION_SYSTEM_PROMPT,
+            },
+            {
+              role: "user",
+              content: transcript,
+            }
+          ],
+        },
+      }
+    );
 
-      const prompt = `${DESCRIPTION_SYSTEM_PROMPT}\n\nTranscript: ${transcript}`;
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      return response.text();
-    });
+    const description = body.choices[0]?.message.content;
 
     if (!description) {
       throw new Error("Bad request");
