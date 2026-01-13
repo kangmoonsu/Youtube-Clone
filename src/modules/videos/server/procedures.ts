@@ -50,7 +50,7 @@ export const videosRouter = createTRPCRouter({
           )),
         })
         .from(videos)
-        .innerJoin(users, eq(videos.userId, users.id))
+        .leftJoin(users, eq(videos.userId, users.id))
         .innerJoin(
           viewerSubscriptions,
           eq(viewerSubscriptions.userId, users.id)
@@ -121,7 +121,7 @@ export const videosRouter = createTRPCRouter({
           )),
         })
         .from(videos)
-        .innerJoin(users, eq(videos.userId, users.id))
+        .leftJoin(users, eq(videos.userId, users.id))
         .where(and(
           eq(videos.visibility, "public"),
           cursor
@@ -185,7 +185,7 @@ export const videosRouter = createTRPCRouter({
           )),
         })
         .from(videos)
-        .innerJoin(users, eq(videos.userId, users.id))
+        .leftJoin(users, eq(videos.userId, users.id))
         .where(and(
           eq(videos.visibility, "public"),
           userId ? eq(videos.userId, userId) : undefined,
@@ -280,7 +280,7 @@ export const videosRouter = createTRPCRouter({
           viewerReaction: viewerReactions.type,
         })
         .from(videos)
-        .innerJoin(users, eq(videos.userId, users.id))
+        .leftJoin(users, eq(videos.userId, users.id))
         .leftJoin(viewerReactions, eq(viewerReactions.videoId, videos.id))
         .leftJoin(viewerSubscriptions, eq(viewerSubscriptions.creatorId, users.id))
         .where(eq(videos.id, input.id))
